@@ -134,13 +134,12 @@ export const StoreProvider = ({ children }) => {
       await axios.delete(`http://localhost:5000/api/data/categories/${categoryId}`);
       dispatch({ type: ACTIONS.DELETE_CATEGORY, payload: categoryId });
     } catch (error) {
-      console.error('Error deleting category:', error.response ? error.response.data : error.message);
       setError(error.message);
       throw error;
-    }finally {
+    } finally {
       setLoading(false);
     }
-}, [setLoading, setError]);
+  }, [setLoading, setError]);
 
 
   const value = {

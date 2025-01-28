@@ -18,7 +18,7 @@ function Dashboard() {
     deleteItem,
     deleteCategory,
     toggleItemCompletion,
-    clearCurrentList
+    clearCurrentList,
   } = useStore();
 
   const [newCategoryName, setNewCategoryName] = useState("");
@@ -72,14 +72,21 @@ function Dashboard() {
     setListTitle("");
     clearCurrentList();
   };
-  const handleDeleteCategory = async (categoryId) => {
-    try {
-      await deleteCategory(categoryId);
-      fetchCategories();
-    } catch (error) {
-      console.error("Error deleting category:", error);
+
+  const handleDeleteCategory = async (categoryId, e) => {
+    e.stopPropagation(); // Prevent category selection when deleting
+    if (window.confirm("Are you sure you want to delete this category?")) {
+      try {
+        await deleteCategory(categoryId);
+        if (state.selectedCategory === categoryId) {
+          selectCategory(null);
+        }
+      } catch (error) {
+        console.error("Error deleting category:", error);
+      }
     }
   };
+
   const handleDeleteItem = async (categoryId, itemId) => {
     try {
       await deleteItem(categoryId, itemId);
@@ -122,14 +129,19 @@ function Dashboard() {
             </div>
             <div className="d-flex align-items-center">
               <p className="text-secondary me-4 mb-0">Welcome</p>
-              <button className="btn btn-success" onClick={handleLogout}>Logout</button>
+              <button className="btn btn-success" onClick={handleLogout}>
+                Logout
+              </button>
             </div>
           </div>
         </div>
       </nav>
 
       {/* Categories Sidebar */}
-      <div className="d-flex flex-column bg-white border-end shadow-sm vh-100" style={{ width: "250px" }}>
+      <div
+        className="d-flex flex-column bg-white border-end shadow-sm vh-100"
+        style={{ width: "250px" }}
+      >
         <div className="p-4 mt-4">
           <div className="d-flex justify-content-between align-items-center mt-5 mb-4">
             <h2 className="fs-5 fw-semibold">Categories</h2>
@@ -163,11 +175,18 @@ function Dashboard() {
                 <span
                   onClick={() => handleCategoryClick(category._id)}
                   style={{ cursor: "pointer" }}
-                  className={state.selectedCategory === category._id ? "fw-bold" : ""}
+                  className={
+                    state.selectedCategory === category._id ? "fw-bold" : ""
+                  }
                 >
                   {category.name}
                 </span>
-                <IoCloseOutline size={20} />
+                <IoCloseOutline
+                  size={20}
+                  onClick={(e) => handleDeleteCategory(category._id, e)}
+                  style={{ cursor: "pointer" }}
+                  className="text-danger"
+                />
               </li>
             ))}
           </ul>
@@ -257,7 +276,9 @@ function Dashboard() {
                           {state.currentList.items.length > 0 ? (
                             <ul className="list-unstyled mb-0">
                               {state.currentList.items.map((item, index) => (
-                                <li key={index} className="py-1">{item.name}</li>
+                                <li key={index} className="py-1">
+                                  {item.name}
+                                </li>
                               ))}
                             </ul>
                           ) : (
@@ -292,17 +313,22 @@ function Dashboard() {
         )}
 
         {/* Display Saved Lists */}
-        {state.selectedCategory && 
+        {state.selectedCategory &&
           state.categories
-            .find(cat => cat._id === state.selectedCategory)
+            .find((cat) => cat._id === state.selectedCategory)
             ?.items.map((list, index) => (
-              <div key={index} className="bg-white rounded-lg shadow-md p-4 mb-2">
+              <div
+                key={index}
+                className="bg-white rounded-lg shadow-md p-4 mb-2"
+              >
                 <div className="d-flex justify-content-between align-items-center">
                   <h5 className="text-success mb-0">{list.name}</h5>
                   <MdDelete
                     size={28}
                     color="red"
-                    onClick={() => handleDeleteItem(state.selectedCategory, list._id)}
+                    onClick={() =>
+                      handleDeleteItem(state.selectedCategory, list._id)
+                    }
                     style={{ cursor: "pointer" }}
                   />
                 </div>
@@ -311,7 +337,13 @@ function Dashboard() {
                     <li
                       key={i}
                       className="d-flex align-items-center py-2"
-                      onClick={() => toggleItemCompletion(state.selectedCategory, list._id, item._id)}
+                      onClick={() =>
+                        toggleItemCompletion(
+                          state.selectedCategory,
+                          list._id,
+                          item._id
+                        )
+                      }
                       style={{ cursor: "pointer" }}
                     >
                       <svg
@@ -324,7 +356,9 @@ function Dashboard() {
                         strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        className={item.completed ? "text-success" : "text-secondary"}
+                        className={
+                          item.completed ? "text-success" : "text-secondary"
+                        }
                       >
                         <circle cx="12" cy="12" r="10"></circle>
                         {item.completed && <path d="M9 12l2 2 4-4" />}

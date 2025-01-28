@@ -74,9 +74,8 @@ export const groceryReducer = (state, action) => {
       case ACTIONS.DELETE_CATEGORY:
         return {
           ...state,
-          categories: state.categories.filter(
-            category => category._id !== action.payload
-          )
+          categories: state.categories.filter(cat => cat._id !== action.payload),
+          selectedCategory: state.selectedCategory === action.payload ? null : state.selectedCategory
         };
 
     case ACTIONS.TOGGLE_ITEM_COMPLETION:

@@ -55,22 +55,26 @@ router.post("/categories", async (req, res) => {
     res.send(category);
   });
 
-  router.delete('/api/data/categories/:id', async (req, res) => {
-    const { categoryId } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(categoryId)) {
-        return res.status(400).send({ message: "Invalid category ID" });
+// Delete category
+router.delete("/categories/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).send({ message: "Invalid category ID" });
     }
 
-    try {
-        const category = await Category.findByIdAndDelete(categoryId);
-        if (!category) {
-            return res.status(404).send({ message: "Category not found" });
-        }
-        res.status(200).send({ message: "Category deleted successfully" });
-    } catch (error) {
-        res.status(500).send({ message: "Error deleting category", error: error.message });
+    const deletedCategory = await Category.findByIdAndDelete(id);
+    
+    if (!deletedCategory) {
+      return res.status(404).send({ message: "Category not found" });
     }
+
+    res.send(deletedCategory);
+  } catch (error) {
+    res.status(500).send({ message: "Error deleting category", error: error.message });
+  }
 });
 
   export default router;
